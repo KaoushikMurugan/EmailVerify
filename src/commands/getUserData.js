@@ -14,14 +14,13 @@ module.exports = {
         // get user data from the database
         const found = database.getEmailUser(hashedEmail, interaction.guild.id, async (emailUser) => {
             if(emailUser) {
-                found = true;
                 await interaction.editReply({ embeds: [{
                     title: "User Data",
                     description: `**Email:** ${email}\n**UserId:** ${emailUser.userID}\n**User**: <@${emailUser.userID}>`,
                 }]});
             }
         })
-        if(found !== false) {
+        if(found !== true) {
             await interaction.editReply({ embeds: [{
                 title: `Error: The email ${email} not found in database for this server`
             }]});
