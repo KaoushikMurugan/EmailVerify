@@ -94,15 +94,18 @@ class Database {
     }
 
     getEmailUser(email, guildID, callback) {
+        let found = false;
         this.db.get("SELECT * FROM userEmails WHERE guildID = ? AND email = ?", [guildID, email.toLowerCase()], (err, result) => {
                 if (err) {
                     throw err;
                 }
                 if (result !== undefined) {
                     callback(new EmailUser(result.email, result.userID, result.guildID, result.groupID, result.isPublic))
+                    found = true;
                 }
             }
         )
+        return found;
     }
 }
 
