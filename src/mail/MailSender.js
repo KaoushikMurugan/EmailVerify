@@ -1,7 +1,7 @@
 let {smtpHost, email, username, password, isGoogle, isSecure, smtpPort} = require("../../config.json");
 
 const nodemailer = require("nodemailer");
-const smtpTransport = require("nodemailer-smtp-transport");
+const smtpTransport = require("nodemailer-smtp-transport-upd");
 const {defaultLanguage, getLocale} = require("../Language");
 const database = require("../database/Database");
 
