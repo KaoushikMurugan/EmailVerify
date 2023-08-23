@@ -113,6 +113,8 @@ To add more languages please create an issue with the translation file. [Templat
 
 ## Self Host
 
+Node version: 16.15.0
+
 To install the bot execute following commands:
 ### Download the Bot
 ```
@@ -128,6 +130,7 @@ nano config.json
   "token": "<Discord Bot Token>",
   "clientId": "<Discord Bot Client ID>",
   "email": "<Email Address>",
+  "username": "<Mail Server Username>",
   "password": "<Email Password>",
   "smtpHost": "<SMTP Server>",
   "isGoogle": <true/false>,
@@ -139,3 +142,7 @@ nano config.json
 npm install
 npm start
 ```
+### Usage
+Type "email" in the console to see debugging messages for email errors.
+
+If you are using a Gmail account you have to create an App password and use that instead of your password.

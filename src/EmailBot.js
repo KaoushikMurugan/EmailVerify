@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const {token, clientId} = require('../config.json');
-const {Routes} = require('discord-api-types/v9');
 const database = require('./database/Database.js')
 const {stdin, stdout} = require('process')
 const rl = require('readline').createInterface(stdin, stdout)
@@ -14,8 +13,9 @@ const messageCreate = require("./bot/messageCreate")
 const sendVerifyMessage = require("./bot/sendVerifyMessage")
 const rest = require("./api/DiscordRest")
 const registerRemoveDomain = require("./bot/registerRemoveDomain")
+const {PermissionsBitField} = require("discord.js");
 
-const bot = new Discord.Client({intents: [Discord.Intents.FLAGS.DIRECT_MESSAGES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS]});
+const bot = new Discord.Client({intents: [Discord.GatewayIntentBits.DirectMessages, Discord.GatewayIntentBits.GuildMessageReactions, Discord.GatewayIntentBits.Guilds, Discord.GatewayIntentBits.GuildMessages, Discord.GatewayIntentBits.GuildMembers]});
 
 const serverStatsAPI = new ServerStatsAPI(bot)
 
@@ -41,9 +41,9 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON())
 }
 
-function registerCommands(guild) {
-    rest.put(Routes.applicationGuildCommands(clientId, guild.id), {body: commands})
-        .then(() => console.log('Successfully registered application commands.'))
+function registerCommands(guild, count = 0, total = 0) {
+    rest.put(Discord.Routes.applicationGuildCommands(clientId, guild.id), {body: commands})
+        .then(() => console.log(`Successfully registered application commands for ${guild.name}: ${count}/${total}`))
         .catch(async () => {
             const errorChannel = guild.channels.cache.find(channel => channel.type === 'GUILD_TEXT' && channel.permissionsFor(bot.user).has('SEND_MESSAGES'))
             if (errorChannel) {
@@ -58,9 +58,11 @@ function registerCommands(guild) {
 }
 
 bot.once('ready', async () => {
-    (await bot.guilds.fetch()).forEach(guild => {
-        console.log(guild.name)
-        registerCommands(guild)
+    let guilds = await bot.guilds.cache
+    let counter = 0
+    guilds.forEach((guild) => {
+        counter += 1
+        registerCommands(guild, counter, guilds.size)
         registerRemoveDomain(guild.id)
         database.getServerSettings(guild.id, async serverSettings => {
             try {
@@ -150,7 +152,7 @@ bot.on('interactionCreate', async interaction => {
             language = defaultLanguage
         }
         try {
-            if (interaction.member.permissions.has("ADMINISTRATOR") || interaction.commandName === "delete_user_data" || interaction.commandName === "verify") {
+            if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) || interaction.commandName === "delete_user_data" || interaction.commandName === "verify") {
                 await command.execute(interaction);
             } else {
                 await interaction.reply({
